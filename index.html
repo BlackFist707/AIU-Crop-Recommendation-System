@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIU Crop Recommendation System</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/AIU1.jpg') no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+            padding-top: 50px; /* Add space between the image and the header */
+        }
+
+        .header {
+            width: 100%;
+            background-color: white;
+            color: #4CAF50;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center-align the text and logo */
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .header img {
+            height: 40px;
+            margin-left: 10px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 150px);
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Crop/tree shape */
+        .crop-shape {
+            position: relative;
+            width: 150px;
+            height: 180px;
+            background: #4CAF50;
+            border-radius: 50% 50% 30% 30%; /* Curly crop/tree shape */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+        }
+
+        .crop-shape::before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            width: 40px;
+            height: 30px;
+            background: #2E7D32;
+            border-radius: 50% 60% 40% 50%; /* Add curls for the leaves */
+            transform: translateX(-50%) rotate(-20deg);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Slight shadow for realism */
+        }
+
+        .crop-shape::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            width: 20px;
+            height: 50px;
+            background: #8B4513; /* Brown for the trunk */
+            border-radius: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Inputs container */
+        .inputs-container {
+            width: 450px;
+            height: 450px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input-item {
+            background: linear-gradient(to bottom, #b3e5fc, #81d4fa); /* Light blue gradient */
+            color: white;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            border-radius: 50%;
+            width: 70px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+        }
+
+        .input-item label {
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .input-item input {
+            width: 50px;
+            height: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+
+        /* Input positioning */
+        .nitrogen { top: 5%; left: 50%; transform: translate(-50%, -50%); }
+        .rainfall { top: 25%; left: 15%; transform: translate(-50%, -50%); }
+        .phosphorus { bottom: 25%; left: 15%; transform: translate(-50%, 50%); }
+        .ph { bottom: 5%; left: 50%; transform: translate(-50%, 50%); }
+        .potassium { bottom: 25%; right: 15%; transform: translate(50%, 50%); }
+        .temperature { top: 25%; right: 15%; transform: translate(50%, -50%); }
+        .humidity { top: 50%; right: 5%; transform: translate(50%, -50%); }
+
+        .submit-button {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-button:hover {
+            background: #45a049;
+        }
+
+        .rating-section {
+            position: absolute; /* Use absolute positioning */
+            top: 10px; /* Distance from the top of the page */
+            right: 10px; /* Distance from the right edge of the page */
+            width: 250px; /* Set a fixed width to ensure it fits */
+            background-color: rgba(255, 255, 255, 0.9); /* Light background for visibility */
+            padding: 10px; /* Add padding for inner spacing */
+            border-radius: 10px; /* Rounded corners for better appearance */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+            z-index: 1000; /* Ensure it stays above other elements */
+            font-size: 14px; /* Adjust font size for better readability */
+            overflow: hidden; /* Ensure content stays within bounds */
+        }
+        .rating-section h2 {
+            font-size: 16px; /* Adjust the heading size */
+            margin-bottom: 10px; /* Space below the heading */
+        }
+        .rating-item {
+            margin-bottom: 10px; /* Space between items */
+            display: flex; /* Align stars and text */
+            justify-content: space-between; /* Space between crop name and stars */
+        }
+        .star-rating {
+            display: flex;
+            gap: 5px; /* Space between stars */
+        }
+        .star {
+            font-size: 18px; /* Adjust star size */
+            color: #ccc; /* Default color for stars */
+            cursor: pointer; /* Make stars clickable */
+            transition: color 0.2s ease-in-out; /* Smooth transition on hover */
+        }
+        .star.selected {
+            color: #FFD700; /* Gold color for selected stars */
+        }
+        
+
+        footer {
+            width: 100%;
+            background-color: white;
+            color: #4CAF50;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        async function getRecommendations(event) {
+            event.preventDefault();
+            const resultCircle = document.getElementById('output');
+            const ratingSection = document.getElementById('rating-section');
+            const ratingList = document.getElementById('rating-list');
+        
+            resultCircle.innerHTML = "Loading...";
+            ratingSection.style.display = "none";
+        
+            try {
+                // Gather form data
+                const formData = new FormData(document.getElementById('cropForm'));
+                const formObject = {};
+                formData.forEach((value, key) => {
+                    formObject[key] = value;
+                });
+        
+                console.log("Form Data Sent:", formObject); // Debugging
+        
+                // Make fetch request to backend
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formObject),
+                });
+        
+                // Check response status
+                if (!response.ok) {
+                    throw new Error('Failed to fetch recommendations. Server error!');
+                }
+        
+                const data = await response.json();
+                console.log("Response Received:", data); // Debugging
+        
+                if (data.crops && Array.isArray(data.crops) && data.crops.length > 0) {
+                    resultCircle.innerHTML = data.crops
+                        .map((crop, index) => `${index + 1}. ${crop.crop} (Probability: ${crop.probability}%)`)
+                        .join('<br>');
+        
+                    // Display rating inputs for each recommended crop
+                    ratingList.innerHTML = data.crops
+                        .map(crop => `
+                            <div class="rating-item">
+                                <p>${crop.crop}</p>
+                                <div class="star-rating" data-crop="${crop.crop}">
+                                    <span data-rating="5" class="star">&#9733;</span>
+                                    <span data-rating="4" class="star">&#9733;</span>
+                                    <span data-rating="3" class="star">&#9733;</span>
+                                    <span data-rating="2" class="star">&#9733;</span>
+                                    <span data-rating="1" class="star">&#9733;</span>
+                                </div>
+                            </div>`).join('');
+        
+                    ratingSection.style.display = "block";
+        
+                    // Attach event listeners for star ratings
+                    document.querySelectorAll('.star').forEach(star => {
+                        star.addEventListener('click', function () {
+                            const rating = this.getAttribute('data-rating');
+                            const crop = this.parentNode.getAttribute('data-crop');
+        
+                            // Highlight selected stars
+                            this.parentNode.querySelectorAll('.star').forEach(s => {
+                                if (s.getAttribute('data-rating') <= rating) {
+                                    s.classList.add('selected');
+                                } else {
+                                    s.classList.remove('selected');
+                                }
+                            });
+        
+                            // Save the user's rating
+                            this.parentNode.setAttribute('data-user-rating', rating);
+                            console.log(`Crop: ${crop}, Rating: ${rating}`); // Debugging
+                        });
+                    });
+                } else {
+                    resultCircle.innerHTML = "No suitable crops found.";
+                }
+            } catch (error) {
+                console.error("Error fetching recommendations:", error);
+                resultCircle.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function submitRatings() {
+            const ratings = [];
+            document.querySelectorAll('.star-rating').forEach(container => {
+                const crop = container.getAttribute('data-crop');
+                const rating = container.getAttribute('data-user-rating') || 0; // Default to 0 if not rated
+                ratings.push({ crop, rating });
+            });
+        
+            console.log("Ratings Data Sent:", ratings); // Debugging
+        
+            try {
+                const response = await fetch('/submit-ratings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ratings }),
+                });
+        
+                if (!response.ok) {
+                    throw new Error('Failed to submit ratings. Server error!');
+                }
+        
+                const data = await response.json();
+                alert(data.message);
+            } catch (error) {
+                console.error('Error submitting ratings:', error);
+                alert('An error occurred while submitting ratings.');
+            }
+        }
+        
+    </script>
+</head>
+<body>
+    <div class="header">
+        <span>AIU Crop Recommendation System</span>
+        <img src="/static/logo.webp" alt="AIU Logo">
+    </div>
+
+    <div class="container">
+        <form id="cropForm" onsubmit="getRecommendations(event)">
+            <div class="inputs-container">
+                <div class="crop-shape" id="output">Recommended Crops</div>
+                <div class="input-item nitrogen">
+                    <label for="N">Nitrogen (N)</label>
+                    <input type="number" name="N" id="N" step="0.1" required>
+                </div>
+                <div class="input-item rainfall">
+                    <label for="rainfall">Rainfall (mm)</label>
+                    <input type="number" name="rainfall" id="rainfall" step="0.1" required>
+                </div>
+                <div class="input-item phosphorus">
+                    <label for="P">Phosphorus (P)</label>
+                    <input type="number" name="P" id="P" step="0.1" required>
+                </div>
+                <div class="input-item ph">
+                    <label for="ph">Soil pH</label>
+                    <input type="number" name="ph" id="ph" step="0.1" required>
+                </div>
+                <div class="input-item potassium">
+                    <label for="K">Potassium (K)</label>
+                    <input type="number" name="K" id="K" step="0.1" required>
+                </div>
+                <div class="input-item temperature">
+                    <label for="temperature">Temperature (°C)</label>
+                    <input type="number" name="temperature" id="temperature" step="0.1" required>
+                </div>
+                <div class="input-item humidity">
+                    <label for="humidity">Humidity (%)</label>
+                    <input type="number" name="humidity" id="humidity" step="0.1" required>
+                </div>
+            </div>
+            <button type="submit" class="submit-button">Get Recommendations</button>
+        </form>
+        
+        <div id="rating-section" class="rating-section" style="display: none;">
+            <h2>Rate Recommended Crops</h2>
+            <div id="rating-list">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <button onclick="submitRatings()" class="submit-button">Submit Ratings</button>
+        </div>
+        
+    <footer>
+        Contact us at <a href="mailto:info@aiu.edu.my">info@aiu.edu.my</a> |
+        &copy; Albukhary International University 2025.
+    </footer>
+</body>
+</html>
